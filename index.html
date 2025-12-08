@@ -12,7 +12,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Helvetica, Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -222,13 +222,22 @@
     </div>
 
     <script>
+        // ===== CẤU HÌNH N8N WEBHOOK =====
+        const N8N_WEBHOOK_URL = 'https://n8n.chess1re.asia/webhook-test/3b3641ad-7530-4964-8349-97d6d2fb5340'; // THAY ĐỔI URL NÀY
+        // ================================
+
         const form = document.getElementById('dataForm');
         const successMessage = document.getElementById('successMessage');
         const dataDisplay = document.getElementById('dataDisplay');
         const displayContent = document.getElementById('displayContent');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            // Disable nút submit để tránh gửi nhiều lần
+            const submitBtn = form.querySelector('.btn-submit');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Đang xử lý...';
             
             // Lấy dữ liệu từ form
             const formData = {
@@ -236,25 +245,51 @@
                 folderLink: document.getElementById('folderLink').value,
                 yearFolder: document.getElementById('yearFolder').value,
                 notes: document.getElementById('notes').value,
-                timestamp: new Date().toLocaleString('vi-VN')
+                timestamp: new Date().toISOString(),
+                timestampVN: new Date().toLocaleString('vi-VN')
             };
 
-            // Lưu vào localStorage
-            let savedData = JSON.parse(localStorage.getItem('formData') || '[]');
-            savedData.push(formData);
-            localStorage.setItem('formData', JSON.stringify(savedData));
+            try {
+                // Gửi dữ liệu tới n8n webhook
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
 
-            // Hiển thị thông báo thành công
-            successMessage.classList.add('show');
-            setTimeout(() => {
-                successMessage.classList.remove('show');
-            }, 3000);
+                if (!response.ok) {
+                    throw new Error('Lỗi khi gửi dữ liệu tới n8n');
+                }
 
-            // Hiển thị dữ liệu
-            displayData(formData);
+                // Lưu vào localStorage (backup local)
+                let savedData = JSON.parse(localStorage.getItem('formData') || '[]');
+                savedData.push(formData);
+                localStorage.setItem('formData', JSON.stringify(savedData));
 
-            // Reset form
-            form.reset();
+                // Hiển thị thông báo thành công
+                successMessage.classList.add('show');
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+
+                // Hiển thị dữ liệu
+                displayData(formData);
+
+                // Reset form
+                form.reset();
+                
+                console.log('✅ Dữ liệu đã được gửi tới n8n thành công!');
+                
+            } catch (error) {
+                console.error('❌ Lỗi:', error);
+                alert('Có lỗi xảy ra khi gửi dữ liệu. Vui lòng kiểm tra lại URL webhook n8n hoặc xem console log.');
+            } finally {
+                // Enable lại nút submit
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Xử lý tách file';
+            }
         });
 
         function displayData(data) {
@@ -263,7 +298,7 @@
                 <p><strong>Link folder tổng:</strong> <a href="${data.folderLink}" target="_blank">${data.folderLink}</a></p>
                 <p><strong>Folder con (Năm):</strong> ${data.yearFolder}</p>
                 ${data.notes ? `<p><strong>Ghi chú:</strong> ${data.notes}</p>` : ''}
-                <p><strong>Thời gian:</strong> ${data.timestamp}</p>
+                <p><strong>Thời gian:</strong> ${data.timestampVN || data.timestamp}</p>
             `;
             dataDisplay.classList.add('show');
         }

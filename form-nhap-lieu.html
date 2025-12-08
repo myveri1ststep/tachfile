@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form Nhập Liệu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-reset {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-reset:hover {
+            background: #e0e0e0;
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .data-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .data-display.show {
+            display: block;
+        }
+
+        .data-display h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .data-display p {
+            color: #666;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .data-display strong {
+            color: #333;
+        }
+
+        .data-display a {
+            color: #667eea;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .data-display a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📂 Form Tách File Excel</h1>
+        
+        <div class="success-message" id="successMessage">
+            ✅ Thông tin đã được gửi thành công!
+        </div>
+
+        <form id="dataForm">
+            <div class="form-group">
+                <label for="fileLink">Link file cần tách <span class="required">*</span></label>
+                <input type="url" id="fileLink" name="fileLink" required placeholder="https://example.com/file.xlsx">
+            </div>
+
+            <div class="form-group">
+                <label for="folderLink">Link folder tổng <span class="required">*</span></label>
+                <input type="url" id="folderLink" name="folderLink" required placeholder="https://drive.google.com/...">
+            </div>
+
+            <div class="form-group">
+                <label for="yearFolder">Tên folder con (Năm) <span class="required">*</span></label>
+                <select id="yearFolder" name="yearFolder" required>
+                    <option value="">-- Chọn năm --</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" selected>2026</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Ghi chú</label>
+                <textarea id="notes" name="notes" placeholder="Nhập ghi chú (nếu có)"></textarea>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn-submit">Xử lý tách file</button>
+                <button type="reset" class="btn-reset">Xóa form</button>
+            </div>
+        </form>
+
+        <div class="data-display" id="dataDisplay">
+            <h3>📊 Dữ liệu đã nhập:</h3>
+            <div id="displayContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('dataForm');
+        const successMessage = document.getElementById('successMessage');
+        const dataDisplay = document.getElementById('dataDisplay');
+        const displayContent = document.getElementById('displayContent');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Lấy dữ liệu từ form
+            const formData = {
+                fileLink: document.getElementById('fileLink').value,
+                folderLink: document.getElementById('folderLink').value,
+                yearFolder: document.getElementById('yearFolder').value,
+                notes: document.getElementById('notes').value,
+                timestamp: new Date().toLocaleString('vi-VN')
+            };
+
+            // Lưu vào localStorage
+            let savedData = JSON.parse(localStorage.getItem('formData') || '[]');
+            savedData.push(formData);
+            localStorage.setItem('formData', JSON.stringify(savedData));
+
+            // Hiển thị thông báo thành công
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+
+            // Hiển thị dữ liệu
+            displayData(formData);
+
+            // Reset form
+            form.reset();
+        });
+
+        function displayData(data) {
+            displayContent.innerHTML = `
+                <p><strong>Link file cần tách:</strong> <a href="${data.fileLink}" target="_blank">${data.fileLink}</a></p>
+                <p><strong>Link folder tổng:</strong> <a href="${data.folderLink}" target="_blank">${data.folderLink}</a></p>
+                <p><strong>Folder con (Năm):</strong> ${data.yearFolder}</p>
+                ${data.notes ? `<p><strong>Ghi chú:</strong> ${data.notes}</p>` : ''}
+                <p><strong>Thời gian:</strong> ${data.timestamp}</p>
+            `;
+            dataDisplay.classList.add('show');
+        }
+
+        // Xóa hiển thị dữ liệu khi reset form
+        form.addEventListener('reset', function() {
+            dataDisplay.classList.remove('show');
+        });
+    </script>
+</body>
+</html>

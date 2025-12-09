@@ -282,8 +282,9 @@
     </div>
 
     <script>
-        // Configuration
+        // Configuration - THAY ĐỔI URL NÀY
         const N8N_WEBHOOK_URL = 'https://n8n.chess1re.asia/webhook-test/3b3641ad-7530-4964-8349-97d6d2fb5340'; // TODO: Thay đổi URL này
+        const USE_N8N = false; // Đổi thành true khi đã có webhook URL
 
         // Populate year dropdown
         function populateYears() {
@@ -377,44 +378,63 @@
 
             setLoading(true);
 
-            try {
-                // TODO: Uncomment this when n8n webhook is ready
-                /*
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData)
-                });
+            // Send to n8n
+            if (USE_N8N) {
+                try {
+                    console.log('Sending to n8n:', N8N_WEBHOOK_URL);
+                    
+                    const response = await fetch(N8N_WEBHOOK_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData)
+                    });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Success response:', data);
+                    
+                    showSuccess('✓ Đã gửi dữ liệu thành công! Đang chuyển sang bước tiếp theo...');
+                    
+                    // Save session data
+                    const sessionData = {
+                        sessionId: data.sessionId || Date.now(),
+                        ...formData,
+                        columns: data.columns || []
+                    };
+                    localStorage.setItem('crm_split_session', JSON.stringify(sessionData));
+                    
+                    // Navigate to next step after 1.5 seconds
+                    setTimeout(() => {
+                        window.location.href = 'step2.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    showError('Có lỗi kết nối đến n8n: ' + error.message);
+                    setLoading(false);
                 }
-
-                const data = await response.json();
-                console.log('Success:', data);
+            } else {
+                // Demo mode - Save to localStorage
+                console.log('Demo mode - Data:', formData);
                 
-                showSuccess('Đã gửi dữ liệu thành công! Đang chuyển sang bước tiếp theo...');
+                const sessionData = {
+                    sessionId: Date.now(),
+                    ...formData
+                };
+                localStorage.setItem('crm_split_session', JSON.stringify(sessionData));
                 
-                // Navigate to next step after 1.5 seconds
                 setTimeout(() => {
-                    // TODO: Navigate to step 2
-                    window.location.href = 'crm-file-split-step2.html?session=' + data.sessionId;
-                }, 1500);
-                */
-
-                // Temporary demo mode
-                setTimeout(() => {
-                    showSuccess('✓ Dữ liệu đã được xác thực! (Demo mode - chưa kết nối n8n)');
-                    console.log('Data ready to send:', formData);
+                    showSuccess('✓ Dữ liệu đã được lưu! (Demo mode - chưa kết nối n8n)');
+                    console.log('Saved to localStorage:', sessionData);
                     setLoading(false);
                 }, 1500);
-
-            } catch (error) {
-                console.error('Error:', error);
-                showError('Có lỗi xảy ra: ' + error.message);
-                setLoading(false);
             }
         });
 

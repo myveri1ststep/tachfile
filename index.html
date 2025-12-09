@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Form Nhập Liệu</title>
+    <title>CRM File Split</title>
     <style>
         * {
             margin: 0;
@@ -12,8 +12,8 @@
         }
 
         body {
-            font-family: Helvetica, Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -22,235 +22,364 @@
         }
 
         .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            background: #1a1a1a;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
             padding: 40px;
-            max-width: 500px;
             width: 100%;
+            max-width: 600px;
+            border: 1px solid rgba(255, 193, 7, 0.2);
         }
 
         h1 {
-            color: #333;
+            color: #ffc107;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 40px;
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(255, 193, 7, 0.3);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 28px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
-            color: #555;
+            color: #d4d4d4;
+            font-size: 14px;
             font-weight: 500;
-            font-size: 14px;
+            margin-bottom: 10px;
+            letter-spacing: 0.3px;
         }
 
-        input, select, textarea {
+        label .required {
+            color: #ffc107;
+            margin-left: 4px;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        select {
             width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
+            padding: 14px 16px;
+            background: #0a0a0a;
+            border: 1px solid #333333;
             border-radius: 8px;
-            font-size: 14px;
+            color: #e8e8e8;
+            font-size: 15px;
             transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        input:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 100px;
+        input[type="text"]:focus,
+        input[type="url"]:focus,
+        select:focus {
+            border-color: #ffc107;
+            box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
         }
 
-        .required {
-            color: #e74c3c;
+        input::placeholder {
+            color: #555555;
         }
 
-        .btn-group {
+        select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffc107' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            padding-right: 40px;
+        }
+
+        select option {
+            background: #0a0a0a;
+            color: #e8e8e8;
+        }
+
+        .button-group {
             display: flex;
-            gap: 10px;
-            margin-top: 30px;
+            gap: 12px;
+            margin-top: 36px;
         }
 
         button {
             flex: 1;
-            padding: 14px;
+            padding: 14px 24px;
+            font-size: 15px;
+            font-weight: 600;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            letter-spacing: 0.5px;
         }
 
         .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+            color: #000000;
         }
 
         .btn-submit:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .btn-reset {
-            background: #f5f5f5;
-            color: #666;
+            background: #2a2a2a;
+            color: #d4d4d4;
+            border: 1px solid #404040;
         }
 
         .btn-reset:hover {
-            background: #e0e0e0;
+            background: #353535;
+            border-color: #ffc107;
         }
 
+        .helper-text {
+            font-size: 12px;
+            color: #888888;
+            margin-top: 6px;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            border-top-color: #000000;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn-submit.loading .spinner {
+            display: inline-block;
+        }
+
+        .btn-submit.loading .btn-text {
+            opacity: 0.7;
+        }
+
+        /* Error message */
+        .error-message {
+            display: none;
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        /* Success message */
         .success-message {
             display: none;
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+            padding: 12px 16px;
             border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
+            margin-top: 20px;
+            font-size: 14px;
         }
 
         .success-message.show {
             display: block;
-            animation: slideIn 0.3s ease;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+        @media (max-width: 640px) {
+            .container {
+                padding: 30px 20px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            h1 {
+                font-size: 26px;
+                margin-bottom: 30px;
             }
-        }
 
-        .data-display {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            display: none;
-        }
-
-        .data-display.show {
-            display: block;
-        }
-
-        .data-display h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .data-display p {
-            color: #666;
-            margin: 5px 0;
-            font-size: 14px;
-        }
-
-        .data-display strong {
-            color: #333;
-        }
-
-        .data-display a {
-            color: #667eea;
-            text-decoration: none;
-            word-break: break-all;
-        }
-
-        .data-display a:hover {
-            text-decoration: underline;
+            .button-group {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📂 Form Tách File Excel</h1>
+        <h1>CRM File Split</h1>
         
-        <div class="success-message" id="successMessage">
-            ✅ Thông tin đã được gửi thành công!
-        </div>
-
-        <form id="dataForm">
+        <form id="crmForm">
             <div class="form-group">
-                <label for="fileLink">Link file cần tách <span class="required">*</span></label>
-                <input type="url" id="fileLink" name="fileLink" required placeholder="https://example.com/file.xlsx">
+                <label for="sourceFile">
+                    Link file gốc <span class="required">*</span>
+                </label>
+                <input 
+                    type="url" 
+                    id="sourceFile" 
+                    name="sourceFile" 
+                    placeholder="https://sharepoint.com/path/to/file.xlsx"
+                    required
+                >
+                <div class="helper-text">Nhập đường dẫn SharePoint đến file Excel gốc</div>
             </div>
 
             <div class="form-group">
-                <label for="folderLink">Link folder tổng <span class="required">*</span></label>
-                <input type="url" id="folderLink" name="folderLink" required placeholder="https://drive.google.com/...">
+                <label for="folderPath">
+                    Link folder tổng <span class="required">*</span>
+                </label>
+                <input 
+                    type="url" 
+                    id="folderPath" 
+                    name="folderPath" 
+                    placeholder="https://sharepoint.com/path/to/folder"
+                    required
+                >
+                <div class="helper-text">Folder chứa các thư mục con theo năm</div>
             </div>
 
             <div class="form-group">
-                <label for="yearFolder">Tên folder con (Năm) <span class="required">*</span></label>
-                <select id="yearFolder" name="yearFolder" required>
-                    <option value="">-- Chọn năm --</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
+                <label for="year">
+                    Năm <span class="required">*</span>
+                </label>
+                <select id="year" name="year" required>
+                    <!-- Options will be populated by JavaScript -->
                 </select>
+                <div class="helper-text">Chọn năm để xác định folder con đích</div>
             </div>
 
-            <div class="form-group">
-                <label for="notes">Ghi chú</label>
-                <textarea id="notes" name="notes" placeholder="Nhập ghi chú (nếu có)"></textarea>
+            <div class="button-group">
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    <span class="btn-text">Tiếp tục</span>
+                    <span class="spinner"></span>
+                </button>
+                <button type="reset" class="btn-reset">Đặt lại</button>
             </div>
 
-            <div class="btn-group">
-                <button type="submit" class="btn-submit">Xử lý tách file</button>
-                <button type="reset" class="btn-reset">Xóa form</button>
-            </div>
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
         </form>
-
-        <div class="data-display" id="dataDisplay">
-            <h3>📊 Dữ liệu đã nhập:</h3>
-            <div id="displayContent"></div>
-        </div>
     </div>
 
     <script>
-        // ===== CẤU HÌNH N8N WEBHOOK =====
-        const N8N_WEBHOOK_URL = 'https://n8n.chess1re.asia/webhook-test/3b3641ad-7530-4964-8349-97d6d2fb5340'; // THAY ĐỔI URL NÀY
-        // ================================
+        // Configuration
+        const N8N_WEBHOOK_URL = 'https://n8n.chess1re.asia/webhook-test/3b3641ad-7530-4964-8349-97d6d2fb5340'; // TODO: Thay đổi URL này
 
-        const form = document.getElementById('dataForm');
-        const successMessage = document.getElementById('successMessage');
-        const dataDisplay = document.getElementById('dataDisplay');
-        const displayContent = document.getElementById('displayContent');
+        // Populate year dropdown
+        function populateYears() {
+            const yearSelect = document.getElementById('year');
+            const currentYear = new Date().getFullYear();
+            const startYear = currentYear - 1;
+            const endYear = currentYear + 1;
 
-        form.addEventListener('submit', async function(e) {
+            for (let year = startYear; year <= endYear; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                
+                // Set current year as default
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                
+                yearSelect.appendChild(option);
+            }
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            
+            // Hide success message if showing
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.add('show');
+            
+            // Hide error message if showing
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        // Hide all messages
+        function hideMessages() {
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('successMessage').classList.remove('show');
+        }
+
+        // Set loading state
+        function setLoading(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            const form = document.getElementById('crmForm');
+            
+            if (isLoading) {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                form.querySelectorAll('input, select, button').forEach(el => {
+                    if (el.id !== 'submitBtn') el.disabled = true;
+                });
+            } else {
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
+                form.querySelectorAll('input, select, button').forEach(el => {
+                    el.disabled = false;
+                });
+            }
+        }
+
+        // Form submission handler
+        document.getElementById('crmForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            hideMessages();
             
-            // Disable nút submit để tránh gửi nhiều lần
-            const submitBtn = form.querySelector('.btn-submit');
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Đang xử lý...';
-            
-            // Lấy dữ liệu từ form
             const formData = {
-                fileLink: document.getElementById('fileLink').value,
-                folderLink: document.getElementById('folderLink').value,
-                yearFolder: document.getElementById('yearFolder').value,
-                notes: document.getElementById('notes').value,
-                timestamp: new Date().toISOString(),
-                timestampVN: new Date().toLocaleString('vi-VN')
+                sourceFile: document.getElementById('sourceFile').value.trim(),
+                folderPath: document.getElementById('folderPath').value.trim(),
+                year: document.getElementById('year').value,
+                timestamp: new Date().toISOString()
             };
 
+            console.log('Form Data:', formData);
+
+            // Validate URLs
             try {
-                // Gửi dữ liệu tới n8n webhook
+                new URL(formData.sourceFile);
+                new URL(formData.folderPath);
+            } catch (error) {
+                showError('Vui lòng nhập URL hợp lệ cho file và folder');
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                // TODO: Uncomment this when n8n webhook is ready
+                /*
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: {
@@ -260,53 +389,45 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Lỗi khi gửi dữ liệu tới n8n');
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
-                // Lưu vào localStorage (backup local)
-                let savedData = JSON.parse(localStorage.getItem('formData') || '[]');
-                savedData.push(formData);
-                localStorage.setItem('formData', JSON.stringify(savedData));
-
-                // Hiển thị thông báo thành công
-                successMessage.classList.add('show');
+                const data = await response.json();
+                console.log('Success:', data);
+                
+                showSuccess('Đã gửi dữ liệu thành công! Đang chuyển sang bước tiếp theo...');
+                
+                // Navigate to next step after 1.5 seconds
                 setTimeout(() => {
-                    successMessage.classList.remove('show');
-                }, 3000);
+                    // TODO: Navigate to step 2
+                    window.location.href = 'crm-file-split-step2.html?session=' + data.sessionId;
+                }, 1500);
+                */
 
-                // Hiển thị dữ liệu
-                displayData(formData);
+                // Temporary demo mode
+                setTimeout(() => {
+                    showSuccess('✓ Dữ liệu đã được xác thực! (Demo mode - chưa kết nối n8n)');
+                    console.log('Data ready to send:', formData);
+                    setLoading(false);
+                }, 1500);
 
-                // Reset form
-                form.reset();
-                
-                console.log('✅ Dữ liệu đã được gửi tới n8n thành công!');
-                
             } catch (error) {
-                console.error('❌ Lỗi:', error);
-                alert('Có lỗi xảy ra khi gửi dữ liệu. Vui lòng kiểm tra lại URL webhook n8n hoặc xem console log.');
-            } finally {
-                // Enable lại nút submit
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Xử lý tách file';
+                console.error('Error:', error);
+                showError('Có lỗi xảy ra: ' + error.message);
+                setLoading(false);
             }
         });
 
-        function displayData(data) {
-            displayContent.innerHTML = `
-                <p><strong>Link file cần tách:</strong> <a href="${data.fileLink}" target="_blank">${data.fileLink}</a></p>
-                <p><strong>Link folder tổng:</strong> <a href="${data.folderLink}" target="_blank">${data.folderLink}</a></p>
-                <p><strong>Folder con (Năm):</strong> ${data.yearFolder}</p>
-                ${data.notes ? `<p><strong>Ghi chú:</strong> ${data.notes}</p>` : ''}
-                <p><strong>Thời gian:</strong> ${data.timestampVN || data.timestamp}</p>
-            `;
-            dataDisplay.classList.add('show');
-        }
-
-        // Xóa hiển thị dữ liệu khi reset form
-        form.addEventListener('reset', function() {
-            dataDisplay.classList.remove('show');
+        // Reset form handler
+        document.getElementById('crmForm').addEventListener('reset', function() {
+            hideMessages();
+            // Re-populate years to reset to current year
+            document.getElementById('year').innerHTML = '';
+            populateYears();
         });
+
+        // Initialize
+        populateYears();
     </script>
 </body>
 </html>
